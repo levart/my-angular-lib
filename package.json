@@ -2,12 +2,13 @@
   "name": "my-angular-workspace",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "postinstall": "ng build my-shared-lib"
   },
+  "main": "./dist/my-shared-lib/fesm2022/my-shared-lib.mjs",
+  "typings": "./dist/my-shared-lib/index.d.ts",
+  "files": [
+    "dist/my-shared-lib"
+  ],
   "private": true,
   "dependencies": {
     "@angular/common": "^20.0.0",
