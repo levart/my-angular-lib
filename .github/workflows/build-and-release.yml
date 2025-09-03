@@ -7,19 +7,49 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm ci
-      - run: ng build my-shared-lib
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build library
+        run: npx ng build my-shared-lib
+
+      - name: Update peer dependencies
+        run: |
+          cd dist/my-shared-lib
+          # Update package.json to use flexible Angular versions
+          npx json -I -f package.json -e 'this.peerDependencies["@angular/common"]=">=19.0.0 <22.0.0"'
+          npx json -I -f package.json -e 'this.peerDependencies["@angular/core"]=">=19.0.0 <22.0.0"'
+
       - name: Deploy to dist branch
         run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git checkout -b dist
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Check if dist branch exists
+          git fetch origin dist || echo "dist branch doesn't exist yet"
+
+          # Create/switch to dist branch
+          git checkout -B dist
+
+          # Copy built library to root
           cp -r dist/my-shared-lib/* .
-          rm -rf projects/ src/ dist/ angular.json tsconfig.json
+
+          # Clean up unnecessary files
+          rm -rf projects/ .vscode/ src/ dist/ angular.json tsconfig.json .editorconfig .gitignore e2e/
+
+          # Add and commit
           git add .
-          git commit -m "Auto-build library"
+          git commit -m "Auto-build library $(date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+
+          # Push to dist branch
           git push -f origin dist

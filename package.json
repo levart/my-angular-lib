@@ -2,7 +2,8 @@
   "name": "my-angular-workspace",
   "version": "0.0.0",
   "scripts": {
-    "postinstall": "ng build my-shared-lib"
+    "postinstall": "ng build my-shared-lib",
+    "build:lib": "ng build my-shared-lib"
   },
   "main": "./dist/my-shared-lib/fesm2022/my-shared-lib.mjs",
   "typings": "./dist/my-shared-lib/index.d.ts",
